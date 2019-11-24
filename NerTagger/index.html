@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NerTagger</title>
+<script src="./js/main.js"></script>
+<script src="./js/tsv.js"></script>
+<script src="./js/display.js"></script>
+<script src="./js/tools.js"></script>
+</head>
+<link href="./css/main.css" rel="stylesheet" type="text/css" />
+</head>
+<body onload='initContent()'>
+<div id='mainPanel' style="min-height: 850px;">
+<div id="toolBar" style='height: 30px; marign-left: 10px;'> 
+<ul id="mainMenu">
+    <li id="fileMenu"><a href='#' class="mainMenuItem" onclick="menuDropdown(this)">File</a>
+    	<div class="dropdown">
+ 			<div class="dropdown-content">
+    			<a href="#" onclick='loadTXT()'>Load plain text file <input type="file" id="txtID" style="display:none"/></a> 			
+    			<a href="#" onclick='loadTSV(2)'>Load tagged sentences <input type="file" id="txtxmlID" style="display:none"/></a>
+    			<a href="#" onclick='loadTDF()'>Load IOB/BU formatted data <input type="file" id="tdfID" style="display:none"/></a>    			
+    			<a href="#" onclick='loadDoc("listofdocuments")'>Load document from DB <input type="file" id="dbdocID" style="display:none"/></a>
+    			<a href="#" onclick='loadDoc("removedocument")'>Remove document from DB <input type="file" id="dbremID" style="display:none"/></a>
+    			<a href="#" onclick='readDB(2)'>Remove all documents</a>
+    			<a href="#" onclick='saveTSV()'>Export tagged sentences <input type="file" id="loadtsvID" nwsaveas style="display:none"/></a>
+    			<a href="#" onclick='saveTDF()'>Export IOB/BU formatted data <input type="file" id="exptdfID" nwsaveas style="display:none"/></a>
+    			<a href="#" onclick='saveTOKS()'>Export tokenized sentences <input type="file" id="exptoksID" nwsaveas style="display:none"/></a>
+    			<a href="#" onclick='saveTXT()'>Save document in a plain text file <input type="file" id="loadtxtID" nwsaveas style="display:none"/></a>
+    			<a href="#" onclick='clearScreen();'>Clear Screen</a>
+    			<a href="#" onclick='endApp()'>Exit</a>
+  			</div>
+		</div>
+	</li>
+	
+	<li id="compareMenu"><a href="#" class="mainMenuItem" onclick="menuDropdown(this)">Engine</a>
+    	<div class="dropdown">
+ 			<div class="dropdown-content">
+    			<a href="#" onclick='testEngine()'>Launch NerEngine </a>
+    			<!--  <a href="#" onclick='showWexSection()'>Show the latest NerEngine results </a> -->
+    			<a href="#" onclick='saveEng()'>Save document tagged by NerEngine <input type="file" id="expengID" nwsaveas style="display:none"/></a>   			
+  			</div>
+		</div>    
+    </li>
+    
+	<li id="extMenu"><a href="#" class="mainMenuItem" onclick="menuDropdown(this)">Compare</a>
+    	<div class="dropdown">
+ 			<div class="dropdown-content">
+    			<a href="#" onclick='loadExternal()'>Compare with external results <input type="file" id="extcmpID" style="display:none"/></a>
+    			<a href="#" onclick='showWexSection()'>Show the latest results of compare </a>    			
+    			<a href="#" onclick='showSummarySection()'>Clear results of compare </a>
+  			</div>
+		</div>    
+    </li>    
+    
+    <li id="settingsMenu"><a href="#" class="mainMenuItem" onclick="menuDropdown(this)">Settings</a>
+    	<div class="dropdown">
+ 			<div class="dropdown-content">
+    			<a href="#">Font size (100-200%): <input id="fontsize" style="margin-left:32px; text-align: center;" onkeypress="endSettings()" size=1/> </a>
+    			<a href="#">Page size: <input id="pagesize" style="margin-left:112px; text-align: center;" onkeypress="endSettings()" size=1/> </a>
+    			<a href="#">TDF type (BU/IOB): <input id="tdftype" style="margin-left:41px; text-align: center;" onkeypress="endSettings()" size=1/> </a>
+    			<a href="#">Decorate test results&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="menucheckbox"><input type="checkbox" id="decorcbox" onclick="decorateTestResults(this)"/><label for="decorcbox"></label></div> </a>
+    			<a href="#">Show errors in tokenized data <div class="menucheckbox"><input type="checkbox" id="errcbox" onclick="showErrorsInTDF(this)"/><label for="errcbox"></label></div> </a>
+    			<a href="#">Debug info in tokenized data <div class="menucheckbox second"><input type="checkbox" id="debugcbox" onclick="showDebugInTDF(this)"/><label for="debugcbox"></label></div> </a>
+    			
+    			<a href="#">Show entities, found exactly <div class="menucheckbox third"><input type="checkbox" id="exactbox" onclick="showExactDets(this)"/><label for="exactbox"></label></div> </a>
+    			
+    			<a href="#" onclick='changeDefaultDirection()'>Change text direction to opposite </a>
+    			<a href="#" onclick='setTokenizerPath()'>Set path to directory with jars</a>
+    			<!--  <a href="#" onclick='setExtModelLauncherPath()'>Set path to external model's launcher</a> -->
+  			</div>
+		</div>    
+    </li>
+    <li id="helpMenu"><a href="#" class="mainMenuItem" onclick="menuDropdown(this)">Help</a>
+        <div class="dropdown">
+ 			<div class="dropdown-content help" style="width: 500px;">
+    			<a href="#" class="bolditem">Breaf info: </a>
+    			<a href="#"><b>Active Layer: </b>Defines the functionality of common shortcuts. Allows moving between the entities of the given type only. </a>
+    			<a href="#"><b>Show layers: </b>Defines which types of entities should be shown in the work area. </a>
+    			<a href="#"><b>Rendering: </b>Allows to set specific color and user's shortcut for each type of entities. Change colors requires to restart the Tagger. </a>
+    			<a href="#"><b>Common shortcut F1: </b>Marks selected area as an entitity of the type, defined by Active Layer. Doesn't work for "None". </a>
+    			<a href="#"><b>Common shortcut F12: </b>Unmarks selected area as an entitity of the type, defined by Active Layer. If Active Layer is set to "None", unmarks all types of entities, connected with selected area. </a>
+    			<a href="#"><b>User's shortcuts: </b>Set in the "Entity Rendering" dialog. Used with CTRL button to mark the selected area as an entity of specific type. Doesn't depend on Active Layer. </a>
+    			<a href="#"><b>Colors: </b>Entities are shown with the background color, choosen for their type in the "Entity Rendering" dialog. If "Show Layers" set to "All", segments of the text, which belong to multiply entities, shown as a white text with a black background. </a>
+    			<a href="#"><b>Common shortcut F7: </b>Search text pattern in the work area. </a>
+    			<a href="#"><b>Editing: </b>Inserting a new line isn't allowed. Existing line can be deleted by removing all its text (for example, by Ctrl+A, Bksp) </a>
+    			<a href="#"><b>Navigation: </b>Use Arrows to move cursor to the neighboring position. Use Home and End to move cursor to the start and to the end of the current line. Use PgUp and PgDown for moving between lines (page size can be set in Settings menu). Use Crtl+Home and Ctrl+End to move cursor to the start or to the end of the document. Use Line and Position editable fields to move cursor directly to the needed position. </a>
+    			<a href="#"></a>
+  			</div>
+		</div>    
+    </li>
+</ul>
+<div id="docname" style="display:inline-block; position: relative; font-weight:bold; left: 500px;"></div>
+<div id="searchDiv" style="display:none; position: absolute; font-weight:bold; right: 33px;">Search: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="searchPat" onblur="stopSearch(this)" size="39"/></div>
+</div>  <!-- tool bar -->
+<div class="box" style="height: 820px; display: flex; flex-flow: row; align-content: stretch; border-style: double; border-color: gray; border-radius: 5px; padding: 0px; margin: 0px 20px 0px 20px;">
+<div id="workPanel" class="workPanel" style="flex: 3 1.2;">
+<div id="workArea" class="rtl" style="width: 100%; height: 100%;"></div>
+</div>
+<div class="toolsPanel" style="flex: 1.2 3; background: #F0F0F0; border-left: double; border-left-color: gray; border-top-right-radius: 5px; border-bottom-right-radius: 5px;">
+<div>
+   <fieldset>
+      <legend style="color:blue;font-weight:bold;">Selected Entity</legend>
+      <table width="100%">
+         <tr>
+            <td>Entity Text:</td>
+            <td style="width=67%;"><input type="text" id="entityText" style="width:100%; font-weight: bold; font-size: 120%;" dir="auto" readonly/></td>
+         </tr>
+         <tr>
+            <td>Entity Type:</td>
+            <td style="width=67%;"><select id="entityType" disabled style="width:101%; font-size: 120%; font-weight: bold; color: black;" onchange="updateActive(this)" onfocus="setSpanInEdit(true);">
+            		<option name='empty' value=""> </option>
+            	</select>
+            </td>	
+         </tr>
+         <tr>
+            <td>Line:</td>
+            <td><input type="text" id="textLine" style="width:100%; background-color: #F9F9F9;" tabindex="-1" onchange="moveToPos(this);"/></td>
+         </tr>
+         <tr>
+            <td>Position:</td>
+            <td><input type="text" id="textPosition" style="width:100%; background-color: #F9F9F9;" tabindex="-1" onchange="moveToPos(this);"/></td>
+         </tr>
+         <tr>
+            <td>Length:</td>
+            <td><input type="text" id="textLength" style="width:100%; background-color: #F9F9F9;" tabindex="-1" readonly/></td>
+         </tr>
+         <tr style="height: 10px;"></tr>
+         </table>
+         <table width="100%">
+         <tr>
+         	<td style="text-align: center">
+         	<button id="b1" onclick="searchEntity(4)" title="Last entity">&nbsp;&lt;&lt;&nbsp;</button>
+         	<button id="b2" onclick="searchEntity(3)" title="Next entity">&nbsp;&nbsp;&lt;&nbsp;&nbsp;</button>
+         	<button id="b3" onclick="searchEntity(2)" title="Previous entity">&nbsp;&nbsp;&gt;&nbsp;&nbsp;</button>
+         	<button id="b4" onclick="searchEntity(1)" title="First entity">&nbsp;&gt;&gt;&nbsp;</button>
+         	</td>
+         </tr>                  
+      </table>
+   </fieldset>
+</div>
+<div style="height: 10px;"></div>
+<div>
+   <fieldset>
+      <legend style="color:blue;font-weight:bold;">Layers</legend>
+      <table width="100%">
+         <tr>
+            <td id="tdal">Active layer:</td>
+            <td style="width:40%;">
+	           	<select id="activeLayer" style="width:100%; font-size:105%;" onchange="updateActive()" onfocus="setSpanInEdit(true);">
+            		<option name='empty' value="None">None</option>
+            	</select>
+            </td>
+         </tr>
+         <tr></tr>
+            <td id="tdshl">Show layers:</td>
+            <td style="width:40%;">
+	           	<select id="showLayer" style="width:100%; font-size:105%;" onchange="updateLayer(this)" onfocus="setSpanInEdit(true);">
+            		<option name='empty' value="all">All</option>
+            	</select>
+            </td>
+         </tr>
+         <tr></tr>
+         <tr>
+            <td id="configureLayers">Rendering:</td>
+            <td style="width:40%;">
+            	<button id="confRendering" style="height: 20pt; width:100%" onclick="configLayersDialog();">Push to configure</button> 
+            </td>
+         </tr>
+         <tr>
+         	<td style="width:70%;">Reload entities</td>
+         	<td style="position: relative; right: -20px;"><input type="file" id="fileID" tabindex="-1"/></td>
+         </tr>
+      </table>
+   </fieldset>
+</div>
+<div style="height: 10px;"></div>
+<div id="sumid">
+   <fieldset>
+      <legend style="color:blue;font-weight:bold;">Summary</legend>
+      <div style="overflow-y:auto; height: 100%;">
+      <table id="summaryTableID" style="overflow-y:auto; width:100%; height: 100%;">
+      	<tr id="summaryTr1">
+      		<td style="width:65%;">Entities at all:</td>
+      		<td style="width:5%;"></td>
+      		<td style="width:10%; text-align:center;"></td>
+      		<td id="tdall" style="width:15%; text-align:right; margin-right: 15px;">0</td>
+      	</tr>
+      </table>
+      </div>
+   </fieldset>
+</div>
+<div id="wexresults" style="display: none">
+   <fieldset>
+      <legend id="wrlegend" style="color:blue;font-weight:bold;">Test results</legend>
+      <table id="wexTableID" width="100%" style="overflow-y:auto; height: 100%">
+      	<tr><td style="width:70%;">Tagged at all:</td><td id="tdwexall" style="width:20%; text-align:right;"></td></tr>
+      	<tr><td style="width:70%;">Found by engine:</td><td id="tdwexfound" style="width:20%; text-align:right;"></td></tr>
+      	<tr><td style="padding-left:10px;">TP - exactly:</td><td id="tdwexexact" style="width:20%; text-align:right;"></td></tr>
+      	<tr><td style="padding-left:10px;">TP - partially:</td><td id="tdwexpart" style="width:20%; text-align:right;"></td></tr>
+      	<tr><td style="padding-left:10px;">FP - falsely:</td><td id="tdwexfals" style="width:20%; text-align:right;"></td></tr>
+      	<tr><td>FN - not found by engine:</td><td id="tdwexnotf" style="width:20%; text-align:right;"></td></tr>
+      	<tr style="height: 10px;"><td></td><td></td></tr>
+      	<tr><td>Exact:</td><td></td>
+      	<tr><td style="padding-left:10px;">Precision:</td><td id="tdwexprecision1" style="width:20%; text-align:right;"></td></tr>
+      	<tr><td style="padding-left:10px;">Recall:</td><td id="tdwexrecall1" style="width:20%; text-align:right;"></td></tr>
+      	<tr><td style="padding-left:10px;">F-measure:</td><td id="tdwexfmeasure" style="width:20%; text-align:right;"></td></tr>
+      </table>
+   </fieldset>
+   <br/>
+   <div style="position:relative; left: 22px;"><table style="width:90%;"><tr>
+   		<td style="width:40%;"><button id="showdet" style="width:100%;" onclick="showTestDetails(1);">Found entities</button></td>
+   		<td style="width:20%;"></td>
+   		<td style="width:40%;"><button id="showsum" style="width:100%;" onclick="showTestDetails(2);">Source entities</button></td>
+   	</tr></table></div>
+</div>
+<div id="wexdetails" style="display: none">
+   <fieldset>
+      <legend id="wdlegend" style="color:blue;font-weight:bold;">Test details</legend>      
+      <table id="wexDetHeadID" width="100%" style="height: 90%;">
+      <tr><td style="width:20%;">Entity</td><td style="width:26%;text-align:center;">Text</td><td style="width:13%;text-align:right;">Line&nbsp;</td><td style="width:13%;text-align:right;">Begin&nbsp;&nbsp;</td>
+      	 <td style="width:13%;text-align:right;">Len.&nbsp;&nbsp;</td><td style="width:15%;">Type</td></tr>
+      </table>
+      <div style="width:100%; overflow-y: auto; height: 290px; border-bottom: 1px solid gray;">
+      <table id="wexdetlinestab" width="100%">
+      <tbody id="wexdetlines">      
+      </tbody>
+      </table>
+      </div>  
+      <div style="width:100%; top-margin: 3px;">
+      <table style="width:100%; matgin-top: 20px;"><tr>
+      <td style="text-align:left;"><button onclick="prevTestDetails()" style="width:33%">Prev</button></td>
+      <td style="text-align:center;"><button onclick="showWexSection()" style="width:33%">Back</button></td>
+      <td style="text-align:right;"><button onclick="nextTestDetails()" >Next</button></td>
+      </tr></table>
+      </div>   
+   </fieldset>
+</div>
+
+</div>  <!-- box -->
+<div class='messagePanel'></div>
+</div>
+<div id="status"></div>   
+<button id="getresults" onclick="canGetResults(this)" style="display:none"></button>
+<button id="redisplay" onclick="canRedisplay(this)" style="display:none"></button>
+<button id="busyBut" onclick="stopBusyIndicator()" style="display:none"></button>
+<button id="formsg" onclick="changeStatus()" style="display:none"></button>
+</div>  <!-- main panel -->
+<div>
+</body>
+</html>
